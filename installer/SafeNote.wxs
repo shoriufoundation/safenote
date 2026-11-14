@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+    <Package
+        Name="SafeNote"
+        Manufacturer="Shoriu Foundation"
+        Version="$(var.ProductVersion)"
+        UpgradeCode="B4D3A920-7C61-4B86-9A25-1C8D7E3F6210"
+        Scope="perMachine">
+
+        <SummaryInformation
+            Description="SafeNote - Your safety. Your privacy. Your choice."
+            Manufacturer="Shoriu Foundation" />
+
+        <MajorUpgrade
+            DowngradeErrorMessage="A newer version of SafeNote is already installed."
+            Schedule="afterInstallInitialize" />
+
+        <MediaTemplate EmbedCab="yes" />
+
+        <!-- Property for desktop shortcut creation (default: 1 / enabled) -->
+        <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" />
+
+        <!-- UI definition with directory selection -->
+        <ui:WixUI
+            Id="WixUI_InstallDir"
+            InstallDirectory="INSTALLFOLDER" />
+
+        <!-- Installation Directory Structure -->
+        <StandardDirectory Id="ProgramFiles64Folder">
+            <Directory Id="INSTALLFOLDER" Name="SafeNote" />
+        </StandardDirectory>
+
+        <!-- Application Files ComponentGroup -->
+        <ComponentGroup Id="AppFilesGroup" Directory="INSTALLFOLDER">
+            <Files Include="$(var.SourceDir)\**" />
+        </ComponentGroup>
+
+        <!-- Start Menu Shortcut -->
+        <StandardDirectory Id="ProgramMenuFolder">
+            <Directory Id="ProgramMenuDir" Name="SafeNote">
+                <Component
+                    Id="StartMenuShortcutComponent"
+                    Guid="A7F19E34-2B65-4C8D-9F10-6E3A5D8B2C41"
+                    Bitness="always64">
+
+                    <Shortcut
+                        Id="SafeNoteStartMenuShortcut"
+                        Name="SafeNote"
+                        Description="Your safety. Your privacy. Your choice."
+                        Target="[INSTALLFOLDER]SafeNote.exe"
+                        WorkingDirectory="INSTALLFOLDER" />
+
+                    <RemoveFolder
+                        Id="RemoveStartMenuDir"
+                        On="uninstall" />
+
+                    <RegistryValue
+                        Root="HKLM"
+                        Key="Software\Shoriu Foundation\SafeNote"
+                        Name="StartMenuShortcut"
+                        Type="integer"
+                        Value="1"
+                        KeyPath="yes" />
+                </Component>
+            </Directory>
+        </StandardDirectory>
+
+        <!-- Optional Desktop Shortcut -->
+        <StandardDirectory Id="DesktopFolder">
+            <Component
+                Id="DesktopShortcutComponent"
+                Guid="5E82181C-037E-464A-A618-40FBE5A6DF55"
+                Bitness="always64"
+                Condition="INSTALLDESKTOPSHORTCUT = 1">
+
+                <Shortcut
+                    Id="SafeNoteDesktopShortcut"
+                    Name="SafeNote"
+                    Description="Your safety. Your privacy. Your choice."
+                    Target="[INSTALLFOLDER]SafeNote.exe"
+                    WorkingDirectory="INSTALLFOLDER" />
+
+                <RegistryValue
+                    Root="HKLM"
+                    Key="Software\Shoriu Foundation\SafeNote"
+                    Name="DesktopShortcut"
+                    Type="integer"
+                    Value="1"
+                    KeyPath="yes" />
+            </Component>
+        </StandardDirectory>
+
+        <!-- Features -->
+        <Feature Id="MainApplication" Title="SafeNote" Level="1">
+            <ComponentGroupRef Id="AppFilesGroup" />
+            <ComponentRef Id="StartMenuShortcutComponent" />
+            <ComponentRef Id="DesktopShortcutComponent" />
+        </Feature>
+
+    </Package>
+</Wix>
